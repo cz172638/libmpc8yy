@@ -1,7 +1,7 @@
 AC_INIT( libmpc8xx/mpc8xx.h )
 AC_PREREQ(2.50)
 
-AM_INIT_AUTOMAKE(mpc8xx,0.0.2)
+AM_INIT_AUTOMAKE(mpc8xx,0.0.3)
 
 AC_PREFIX_DEFAULT(/usr/local)
 

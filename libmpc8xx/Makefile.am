@@ -3,7 +3,7 @@ lib_LTLIBRARIES = libmpc8xx.la
 INCLUDES = $(all_includes)
 AM_LDFLAGS =          
 
-libmpc8xx_la_LDFLAGS = -version-info 0:2:0
+libmpc8xx_la_LDFLAGS = -version-info 0:3:0
 
 libmpc8xx_la_METASOURCES = AUTO
 

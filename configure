@@ -1702,7 +1702,7 @@ fi
 
 # Define the identity of the package.
  PACKAGE=mpc8xx
- VERSION=0.0.2
+ VERSION=0.0.3
 
 
 cat >>confdefs.h <<_ACEOF
