@@ -9,5 +9,5 @@ INCLUDES= $(all_includes)
 
 mpc8xx_LDFLAGS = $(all_libraries) 
 
-CFLAGS := -I../libmpc8xx/
+AM_CFLAGS := -I../libmpc8xx/
                                                                                 
