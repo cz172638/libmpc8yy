@@ -168,6 +168,11 @@ extern void mpc8xx_bdm_reset( void );
  */
 extern int mpc8xx_bdm_wait_power( int timeout );
 
+/** check if the target has power
+ * @return 1 if the target has power else 0
+ */
+extern int mpc8xx_bdm_has_power( );
+
 /** Wait for the target to freeze
  * @param timeout time in secondes to keep waiting
  * @return -1 on error or timeout else 0

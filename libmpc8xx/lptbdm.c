@@ -384,11 +384,6 @@ int mpc8xx_bdm_wait_power( int timeout )
 
 	nResult = lptbdm_port.read( );
 
-	if ( !( nResult & lptbdm_port.VDD1 ) )
-	{
-		mpc8xx_printf( "please turn on power at target\n" );
-	}
-
 	while ( !(nResult & lptbdm_port.VDD1) ) /* until target powered up */
 	{
 		nLast = nResult;
@@ -407,6 +402,16 @@ int mpc8xx_bdm_wait_power( int timeout )
 	return 0;
 }
 
+int mpc8xx_bdm_has_power()
+{
+	int nResult = lptbdm_port.read();
+	
+	if( nResult & lptbdm_port.VDD1 )
+		return 1;
+	else
+		return 0;
+}
+
 
 int mpc8xx_bdm_wait_freeze( int timeout )
 {
@@ -421,19 +426,24 @@ int mpc8xx_bdm_wait_freeze( int timeout )
 
 	while(  time( NULL ) <=  end_time )
 	{
-		nResult = lptbdm_port.read( );
+		/* loop until we have a stable signal */
+		do {
+			nResult = lptbdm_port.read( );
+		} while( nResult != lptbdm_port.read() );
+		
+		if ( !( nResult & lptbdm_port.VDD1 ) )
+		{
+			/* no power */
+			return -2;
+		}
 		
 		if( ( nResult & lptbdm_port.FREEZE ) == lptbdm_port.FREEZE )
 		{
 			/* ok went in freeze */
 			return 0;
 		}
-
-		if ( !( nResult & lptbdm_port.VDD1 ) )
-		{
-			/* no power */
-			return -1;
-		}
+		
+		lptbdm_sleep( lptbdm_port.sleep_time );
 	}
 
 	/* timeout error */	
@@ -533,15 +543,27 @@ int mpc8xx_bdm_clk_serial( const bdm_in_t* in, bdm_out_t* out )
 	
 	if ( !( nResult & lptbdm_port.VDD1 ) )
 	{
-		/* no power */
-		return -1;
+		if( mpc8xx_bdm_wait_power( 10 ) < 0 )
+		{
+			/* no power */
+			return -2;
+		}
+		
+		/* reread to get the freeze state 
+		 * we put that here instead of outside the if
+		 * to have a optimal path when everything goes ok 
+		 */
+		nResult = lptbdm_port.read( );	
 	}
 
 	if( ( nResult & lptbdm_port.FREEZE ) == lptbdm_port.FREEZE )
 	{
 		if( mpc8xx_bdm_wait_ready( 2 ) < 0 )
+		{
+			/* target is not ready in 2 secs */
 			return -1;
-	}
+		}
+	} 
 
 	if( in->prefix & 2  )
 		len = 7;
@@ -566,13 +588,13 @@ int mpc8xx_bdm_clk_serial( const bdm_in_t* in, bdm_out_t* out )
 
 		/* debug command while target not in debug mode */
 		case MPC8XX_BDM_STAT_SEQ_ERROR:
-			res = -1;
+			res = -3;
 			reslen = 7;
 			break;
 
 		/* interrupt occurred, have to read ICR to clear */
 		case MPC8XX_BDM_STAT_CORE_INTERRUPT:
-			res = -1;
+			res = -4;
 			reslen = 7;
 			break;
 
@@ -581,7 +603,7 @@ int mpc8xx_bdm_clk_serial( const bdm_in_t* in, bdm_out_t* out )
 			break;
 
 		default:
-			return -1;
+			return -5;
 			break;
 	}
 

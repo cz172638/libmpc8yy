@@ -154,12 +154,12 @@ extern unsigned int mpc8xx_get_byte( unsigned int addr );
 /**
  *
  */
-extern int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsigned int len );
+extern unsigned int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsigned int len );
 
 /**
  *
  */
-extern int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, unsigned int len );
+extern unsigned int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, unsigned int len );
 
 /**
  *

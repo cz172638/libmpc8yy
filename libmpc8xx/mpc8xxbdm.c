@@ -527,13 +527,14 @@ int mpc8xx_set_byte( unsigned int addr, unsigned int val )
 }
 
 
-int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsigned int len )
+unsigned int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsigned int len )
 {
 	unsigned int val;
 	unsigned int r0;
 	unsigned int r1;
 	bdm_in_t in;
 	bdm_out_t out;
+	unsigned int res = len;
 
 	r0 = mpc8xx_get_gpr(  0 ); /*save r0*/
 	r1 = mpc8xx_get_gpr(  1 ); /*save r1*/
@@ -549,7 +550,7 @@ int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsi
 		in.data = 0x88010000;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 
 		val = mpc8xx_get_gpr(  0 );	/* read byte*/
@@ -573,7 +574,7 @@ int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsi
 		in.data = 0x84010004;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 
 		val = mpc8xx_get_gpr(  0 );	/* read word*/
@@ -594,7 +595,7 @@ int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsi
 		in.data = 0x88010000;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 
 		val = mpc8xx_get_gpr( 0 );		/*read byte*/
@@ -609,16 +610,17 @@ int mpc8xx_read_block( unsigned int from_address, unsigned char* to_buffer, unsi
 	mpc8xx_set_gpr( 0, r0); /*restore r0*/
 	mpc8xx_set_gpr( 1, r1); /*restore r1*/
 
-	return 0;
+	return res;
 }
 
-int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, unsigned int len )
+unsigned int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, unsigned int len )
 {
 	unsigned int val;
 	unsigned int r30;
  	unsigned int r31;
 	bdm_in_t in;
 	bdm_out_t out;
+	unsigned int res = len;
 
 	r30 = mpc8xx_get_gpr(  30 );
 	r31 = mpc8xx_get_gpr(  31 );
@@ -638,7 +640,7 @@ int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, uns
 		in.data = 0x9BFE0000;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 
 		len--;
@@ -662,7 +664,7 @@ int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, uns
 			in.data = val;
 
 			if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-				return -1;
+				return 0;
 			}
 		}
 
@@ -670,14 +672,14 @@ int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, uns
 		in.data = MPC8XX_BDM_DPC_END_DOWNLOAD;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 
 		in.prefix = MPC8XX_BDM_PREFIX_CORE_DATA;
 		in.data = 0;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 	}
 
@@ -696,7 +698,7 @@ int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, uns
 		in.data = 0x9BFE0000;
 
 		if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
-			return -1;
+			return 0;
 		}
 
 		len--;
@@ -705,7 +707,7 @@ int mpc8xx_write_block( unsigned int to_address, unsigned char *from_buffer, uns
 	mpc8xx_set_gpr(  30, r30 );
 	mpc8xx_set_gpr(  31, r31 );
 
-	return 0;
+	return res;
 }
 
 int mpc8xx_hreset( )
@@ -782,11 +784,12 @@ int mpc8xx_resume( )
 		mpc8xx_printf("ICR = %08x\n", icr );
 	}
 
-	/*tell PPC to exit from Debug Port Interrupt*/
+	/* tell PPC to exit from Debug Port Interrupt */
 	in.prefix = MPC8XX_BDM_PREFIX_CORE_INSTRUCTION;
 	in.data = MPC8XX_COM_RFI;
 
-	if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 ){
+	if( mpc8xx_bdm_clk_serial( &in, &out ) < 0 )
+	{
 		mpc8xx_printf("RFI error\n");
 
 		return -1;
