@@ -58,47 +58,55 @@ extern "C" {
 #define BDM_BREAKPOINT {0x0,0x0,0x0,0x0} /* For ppc 8xx */
 
 
-/**
- *
+/** Get a GPR register value
+ * @param reg_nr The register number 0 to 31
+ * @return the register value or 0xDEADBEEF on error
  */
 extern unsigned int mpc8xx_get_gpr( int reg_nr );
 
-/**
- *
+/** Set a GPR register value
+ * @param reg_nr The register number 0 to 31
+ * @param value The register value
+ * @return -1 on error else 0
  */
 extern int mpc8xx_set_gpr( int reg_nr, unsigned int value );
 
-/**
- *
+/** Get MSR
+ * @return the MSR value or 0xDEADBEEF on error
  */
 extern unsigned int mpc8xx_get_msr( void );
 
-/**
- *
+/** Set MSR
+ * @param value the MSR value
+ * @return -1 on error else 0
  */
 extern int mpc8xx_set_msr( unsigned int value );
 
-/**
- *
+/** Get CR value
+ * @return the CR value or 0xDEADBEEF on error
  */
 extern unsigned int mpc8xx_get_cr( void );
 
-/**
- *
+/** Set CR
+ * @param value the CR value
+ * @return -1 on error else 0
  */
 extern int mpc8xx_set_cr( unsigned int value );
 
-/**
- *
+/** Get SPRI 
+ * @param reg_nr the SPRI number
+ * @return the register value or 0xDEADBEEF on error
  */
 extern unsigned int mpc8xx_get_spri( int reg_nr );
 
-/**
- *
+/** Set SPRI
+ * @param reg_nr the SPRI number
+ * @param value the SPRI value
+ * @return -1 on error else 0
  */
 extern int mpc8xx_set_spri( int reg_nr, unsigned int value );
 
-/**
+/**  
  *
  */
 extern int mpc8xx_set_spri_hw( int reg_nr, unsigned int value );

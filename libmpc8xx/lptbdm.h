@@ -209,9 +209,13 @@ typedef struct bdm_out_s bdm_out_t;
  */
 extern int mpc8xx_bdm_clk_serial( const bdm_in_t* in, bdm_out_t* out );
 
-
+/** Set the different timing values
+ * @param delay_time
+ * @param sleep_time
+ * @param relaxed_timing
+ * @return -1 on error else 0
+ */
 extern int mpc8xx_set_timing( unsigned int delay_time, unsigned int sleep_time, int relaxed_timing );
-
 
 #ifdef __cplusplus
 }
