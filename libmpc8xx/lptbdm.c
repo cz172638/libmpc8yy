@@ -410,6 +410,8 @@ int mpc8xx_bdm_wait_power( int timeout )
 
 int mpc8xx_bdm_wait_freeze( int timeout )
 {
+	int nResult;
+	
 	time_t end_time = time( NULL ) + timeout;
 
 	if( mpc8xx_verbose_level( MPC8XX_VERBOSE_TAR )  )
@@ -417,16 +419,25 @@ int mpc8xx_bdm_wait_freeze( int timeout )
 		mpc8xx_printf( "mpc8xx_bdm_wait_freeze:\n" );
 	}
 
-	while( !( ( lptbdm_port.read( ) & lptbdm_port.FREEZE ) == lptbdm_port.FREEZE ) )
+	while(  time( NULL ) <=  end_time )
 	{
-		lptbdm_sleep( lptbdm_port.sleep_time );
+		nResult = lptbdm_port.read( );
+		
+		if( ( nResult & lptbdm_port.FREEZE ) == lptbdm_port.FREEZE )
+		{
+			/* ok went in freeze */
+			return 0;
+		}
 
-		if( time( NULL ) > end_time ){
+		if ( !( nResult & lptbdm_port.VDD1 ) )
+		{
+			/* no power */
 			return -1;
 		}
 	}
 
-	return 0;
+	/* timeout error */	
+	return -1;		
 }
 
 
@@ -511,13 +522,22 @@ int mpc8xx_bdm_clk_serial( const bdm_in_t* in, bdm_out_t* out )
 	int res = 0;
 	int n;
 	int reslen = 0;
-	int len;
+	int len, nResult;
 	unsigned int mask,word;
 
 	/* clear out */
 	memset( out, 0 , sizeof(bdm_out_t) );
 
-	if( ( lptbdm_port.read( ) & lptbdm_port.FREEZE ) == lptbdm_port.FREEZE )
+
+	nResult = lptbdm_port.read( );
+	
+	if ( !( nResult & lptbdm_port.VDD1 ) )
+	{
+		/* no power */
+		return -1;
+	}
+
+	if( ( nResult & lptbdm_port.FREEZE ) == lptbdm_port.FREEZE )
 	{
 		if( mpc8xx_bdm_wait_ready( 2 ) < 0 )
 			return -1;
